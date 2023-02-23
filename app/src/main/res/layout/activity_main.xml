@@ -40,7 +40,7 @@
         android:layout_width="667dp"
         android:layout_height="wrap_content"
         android:gravity="center_vertical|end"
-        android:text="@string/_0"
+        android:text="@string/app_name"
         android:textSize="48sp"
         app:layout_constraintEnd_toStartOf="@+id/guideEast"
         app:layout_constraintStart_toStartOf="@+id/guideWest"
@@ -125,7 +125,7 @@
         android:tag="btnClr"
         android:text="@string/btnClr"
         android:textSize="30sp"
-        app:layout_constraintBottom_toTopOf="@+id/btnMod"
+        app:layout_constraintBottom_toTopOf="@+id/btnPercent"
         app:layout_constraintEnd_toStartOf="@+id/guideEast"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/btnSqrt"
@@ -192,20 +192,20 @@
         android:text="@string/btnDiv"
         android:textSize="30sp"
         app:layout_constraintBottom_toTopOf="@+id/btnMultiply"
-        app:layout_constraintEnd_toStartOf="@+id/btnMod"
+        app:layout_constraintEnd_toStartOf="@+id/btnPercent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/btn6"
         app:layout_constraintTop_toBottomOf="@+id/btnSqrt" />
 
     <Button
-        android:id="@+id/btnMod"
+        android:id="@+id/btnPercent"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:tag="btnMod"
-        android:text="@string/btnMod"
+        android:tag="btnPercent"
+        android:text="@string/btnPercent"
         android:textSize="30sp"
         app:layout_constraintBottom_toTopOf="@+id/btnSub"
         app:layout_constraintEnd_toStartOf="@+id/guideEast"
@@ -292,7 +292,7 @@
         app:layout_constraintEnd_toStartOf="@+id/guideEast"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/btnMultiply"
-        app:layout_constraintTop_toBottomOf="@+id/btnMod" />
+        app:layout_constraintTop_toBottomOf="@+id/btnPercent" />
 
     <Button
         android:id="@+id/btnSign"

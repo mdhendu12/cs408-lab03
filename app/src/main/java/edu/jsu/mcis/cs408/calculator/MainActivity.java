@@ -17,8 +17,6 @@ public class MainActivity extends AppCompatActivity implements AbstractView {
 
     public static final String TAG = "MainActivity";
 
-    public static final int DIGIT_TAG_LENGTH = 4;
-
     private ActivityMainBinding binding;
 
     private CalculatorController controller;
@@ -59,56 +57,12 @@ public class MainActivity extends AppCompatActivity implements AbstractView {
         @Override
         public void onClick(View v) {
             String tag = ((Button) v).getTag().toString();
-            Toast toast = Toast.makeText(binding.getRoot().getContext(), tag, Toast.LENGTH_SHORT);
-            toast.show();
-
-            if ( tag.length() == DIGIT_TAG_LENGTH ) {
-
-                Character digit = tag.charAt(tag.length() - 1);
-                controller.changeKey(digit);
-
-            }
-            else {
-                switch (tag) {
-                    case "btnSqrt":
-                        controller.changeKey('q');
-                        break;
-                    case "btnClear":
-                        controller.changeKey('c');
-                        break;
-                    case "btnDiv":
-                        controller.changeKey('/');
-                        break;
-                    case "btnMultiply":
-                        controller.changeKey('*');
-                        break;
-                    case "btnAdd":
-                        controller.changeKey('+');
-                        break;
-                    case "btnSub":
-                        controller.changeKey('-');
-                        break;
-                    case "btnSign":
-                        controller.changeKey('s');
-                        break;
-                    case "btnDecimal":
-                        controller.changeKey('.');
-                        break;
-                    case "btnEqual":
-                        controller.changeKey('=');
-                        break;
-                    case "btnPercent":
-                        controller.changeKey('%');
-                        break;
-                }
-            }
-
+            controller.processInput(tag);
         }
 
     }
 
     public void modelPropertyChange(final PropertyChangeEvent evt) {
-
 
         String propertyName = evt.getPropertyName();
         String propertyValue = evt.getNewValue().toString();

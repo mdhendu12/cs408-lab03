@@ -3,6 +3,7 @@ package edu.jsu.mcis.cs408.calculator;
 import android.util.Log;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 
 public class CalculatorModel extends AbstractModel {
 
@@ -11,7 +12,8 @@ public class CalculatorModel extends AbstractModel {
     private final String START_VALUE = "0";
     private final Character DECIMAL_POINT = '.';
 
-    // period flag: makes sure multiple periods haven't been entered
+    private static final String ERROR = "ERROR";
+    private int MAX_SCREEN_WIDTH = 12;
     private boolean hasDecimalPoint = false;
 
     private StringBuilder screen;
@@ -87,6 +89,22 @@ public class CalculatorModel extends AbstractModel {
                 case CLEAR:
                     changeState(CalculatorState.CLEAR);
                     break;
+                case SIGN:
+                    if (!(state.equals(CalculatorState.ERROR))) {
+                        changeSign();
+                    }
+                    break;
+                case SQRT:
+                    computeSqrt();
+                    break;
+                case EQUALS:
+                    changeState(CalculatorState.RESULT);
+                    break;
+                case PERCENT:
+                    if (state.equals(CalculatorState.RHS)) {
+                        computePercent();
+                    }
+                    break;
             }
 
         }
@@ -99,6 +117,11 @@ public class CalculatorModel extends AbstractModel {
 
         String oldText = screen.toString();
         screen.setLength(0);
+
+        if (newText.length() > MAX_SCREEN_WIDTH) {
+            newText = newText.substring(0, MAX_SCREEN_WIDTH);
+        }
+
         screen.append(newText);
 
         Log.i(TAG, "Screen Change: " + newText);
@@ -110,21 +133,33 @@ public class CalculatorModel extends AbstractModel {
         if (newState.equals(CalculatorState.CLEAR)) {
             init();
         }
+        else if (newState.equals(CalculatorState.ERROR)) {
+            lhs = null;
+            rhs= null;
+            hasDecimalPoint = false;
+            operator = null;
+            setScreen(ERROR);
+        }
         else {
             // specifies what should happen when we exit state
 
             switch (state) {
 
                 case LHS:
+                    trimDecimal();
                     lhs = new BigDecimal(screen.toString());
                     rhs = null;
                     break;
 
                 case RHS:
+                    trimDecimal();
                     rhs = new BigDecimal(screen.toString());
                     evaluate();
                     break;
 
+                case OP_SELECTED:
+                    hasDecimalPoint = false;
+                    break;
             }
 
         }
@@ -144,27 +179,41 @@ public class CalculatorModel extends AbstractModel {
         }
 
         if (operator != null) {
-            switch (operator) {
-                case ADD:
-                    result = lhs.add(rhs);
-                    break;
-                case SUBTRACT:
-                    result = lhs.subtract(rhs);
-                    break;
-                case MULTIPLY:
-                    result = lhs.multiply(rhs);
-                    break;
-                case DIVIDE:
-                    result = lhs.divide(rhs);
-                    break;
+            try {
+                switch (operator) {
+                    case ADD:
+                        result = lhs.add(rhs);
+                        break;
+                    case SUBTRACT:
+                        result = lhs.subtract(rhs);
+                        break;
+                    case MULTIPLY:
+                        result = lhs.multiply(rhs);
+                        break;
+                    case DIVIDE:
+                        if (rhs.compareTo(BigDecimal.ZERO) == 0) {
+                            throw new ArithmeticException();
+                        }
+                        else {
+                            result = lhs.divide(rhs, MathContext.DECIMAL128);
+                        }
+
+                        break;
+                }
+
+                lhs = result;
+                rhs = null;
+                setScreen(result.toString());
+            }
+            catch (ArithmeticException e) {
+                e.printStackTrace();
+                changeState(CalculatorState.ERROR);
             }
 
-            lhs = result;
-            rhs = null;
-            setScreen(result.toString());
         }
 
     }
+
 
     public void appendDigit(char digit) {
 
@@ -178,9 +227,62 @@ public class CalculatorModel extends AbstractModel {
 
     }
 
+    private void changeSign() {
+        String oldText = screen.toString();
+
+        BigDecimal temp = new BigDecimal(oldText);
+        String newText = temp.negate().toString();
+
+        setScreen(newText);
+
+        Log.i(TAG, "Sign Changed");
+
+        firePropertyChange(CalculatorController.SCREEN_PROPERTY, oldText, newText);
+    }
+
+    private void computePercent() {
+        String oldText = screen.toString();
+
+        BigDecimal temp = new BigDecimal(oldText);
+
+        String newText = temp.divide(BigDecimal.valueOf(100)).multiply(lhs).toString();
+
+        setScreen(newText);
+
+        Log.i(TAG, "Percentage Calculated");
+
+        firePropertyChange(CalculatorController.SCREEN_PROPERTY, oldText, newText);
+    }
+
+    private void computeSqrt() {
+        String oldText = screen.toString();
+        String newText = oldText;
+
+        if (lhs != null && !(state.equals(CalculatorState.RHS))) {
+            this.lhs = new BigDecimal(Math.sqrt(lhs.doubleValue()));
+            newText = lhs.toString();
+        }
+        else {
+            double sqrt = Math.sqrt(Double.parseDouble(oldText));
+            newText = String.valueOf(sqrt);
+        }
+
+        setScreen(newText);
+
+        Log.i(TAG, "Sqrt Taken");
+
+        firePropertyChange(CalculatorController.SCREEN_PROPERTY, oldText, newText);
+    }
+
 
     private enum CalculatorState {
         CLEAR, LHS, OP_SELECTED, RHS, RESULT, ERROR
+    }
+
+    private void trimDecimal() {
+        if (screen.charAt(screen.length() - 1) == '.') {
+            screen.deleteCharAt(screen.length() - 1);
+        }
     }
 
 }
